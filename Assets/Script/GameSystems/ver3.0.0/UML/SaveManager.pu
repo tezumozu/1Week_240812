@@ -1,0 +1,14 @@
+@startuml SaveManager
+    class AcountManager << Singleton MonoBehaviour >><< T : class>>{
+        IEnumlater SaveData()
+        IEnumlater LoginAcount()
+
+    }
+
+    class PlayerData{
+
+    }
+
+    
+
+@enduml

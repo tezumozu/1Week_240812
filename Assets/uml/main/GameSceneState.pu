@@ -1,0 +1,30 @@
+@startuml GameSceneState
+
+    state TitleScene{
+        state option
+        state title
+        state howToPlay
+    }
+
+    state EndressScene {
+        state pause_endress
+        state inGame_endress
+    }
+
+    note bottom of EndressScene: アプデで追加する
+
+    state StoryScene{
+        state pause_story
+        state inGame_story
+    }
+
+    TitleScene --> StoryScene : Start game
+    StoryScene --> TitleScene : Finish Game
+
+    TitleScene -right-> EndressScene : Start game
+    EndressScene -left-> TitleScene : Finish Game
+
+
+
+
+@enduml

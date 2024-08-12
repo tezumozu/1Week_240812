@@ -1,0 +1,80 @@
+@startuml sequence
+participant Zenject
+participant Unity
+participant GameLoopManager
+participant ObjectUpdater
+participant GameManager
+participant SceneLoader
+
+
+== Zenject ==
+Zenject --> GameLoopManager : [Inject] ObjectUpdater
+Zenject --> ObjectUpdater : [Inject] GameManager
+
+Zenject --> GameLoopManager : [InjectMethod] GameManager
+activate GameLoopManager
+GameLoopManager --> GameManager : [Observe] LoadSceneAsync
+GameLoopManager --> SceneLoader : Init and Inject 
+deactivate GameLoopManager
+
+
+Zenject --> CoroutineHander : [InjectMethod] GameManager
+activate CoroutineHander
+CoroutineHander --> GameManager : [Observe] PauseAsync
+deactivate CoroutineHander
+== Awake ==
+
+== Start ==
+Unity --> GameLoopManager : Start
+activate GameLoopManager
+GameLoopManager --> GameLoopManager : Init Parameter
+deactivate GameLoopManager
+
+== Update ==
+group LoopState : Init
+    Unity --> GameLoopManager : Update
+    activate GameLoopManager
+    GameLoopManager --> ObjectUpdater : InitObject
+    activate ObjectUpdater
+    ObjectUpdater --> GameManager : InitObject
+    deactivate ObjectUpdater
+    GameLoopManager --> GameLoopManager : State Change To Update
+    deactivate GameLoopManager
+end
+
+group LoopState : Update
+
+    Unity --> GameLoopManager : Update
+    GameLoopManager --> ObjectUpdater : UpdateObject
+    activate ObjectUpdater
+    deactivate ObjectUpdater
+
+    group LoadScene
+        GameManager --> GameLoopManager : [OnNext] SceneLoadAsync
+        activate GameLoopManager
+        GameLoopManager --> SceneLoader : LoadScene
+
+        group Coroutine
+            activate SceneLoader
+            SceneLoader --> SceneLoader : LoadScene
+        end
+
+        GameLoopManager --> GameLoopManager : State Change To Loading
+        deactivate GameLoopManager
+    end
+
+end
+
+group LoopState : Loading
+    Unity --> GameLoopManager : Update
+    activate GameLoopManager
+    GameLoopManager --> GameLoopManager : Wait
+    deactivate GameLoopManager
+
+    group Coroutine
+        SceneLoader --> SceneLoader : LoadScene
+    end
+    
+end
+
+@enduml

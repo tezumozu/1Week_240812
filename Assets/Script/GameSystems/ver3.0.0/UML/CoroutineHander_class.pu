@@ -1,0 +1,36 @@
+@startuml CoroutineHander
+
+    class CoroutineHander<< Singleton MonoBehaviour >>{
+        - static Dictionary<IEnumerator,Coroutine> ActiveCoroutinDic
+        - static Subject<IEnumerator> FinishCoroutinSubject
+
+        # override void OnInitialize()
+        - [Inject] void UpdateSceneInjection()
+
+        + static Coroutine OrderStartCoroutine(IEnumerator coroutine)
+        + static void OrderStopCoroutine(IEnumerator target)
+        + static void ReStartCoroutine(IEnumerator target)
+        + static bool IsFinishCoroutine(IEnumerator target)
+
+        - static void StopAllActiveCoroutine()
+        - static void ReStartAllActiveCoroutine()
+        - static IEnumerator CheckFinishCoroutine(IEnumerator coroutine)
+    }
+
+    interface I_Pausable{
+        + IObservable<bool> PauseAsync {get}
+    }
+
+    class SceneGameManager{
+
+    }
+
+    abstract GameManager{
+
+    }
+
+    CoroutineHander -down-> I_Pausable : Observe
+    GameManager <|-- SceneGameManager
+    SceneGameManager -right-|> I_Pausable 
+
+@enduml

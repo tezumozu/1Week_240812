@@ -5,30 +5,58 @@ using UnityEngine;
 using Zenject;
 
 public class DungeonMaker{
-    DungeonDigger dungeonDigger;
     E_DungeonCell[,] dungeon;
+    int dungeonHight = 0;
+    DungeonData param;
 
     public DungeonMaker(int level){
-        //levelが2未満ならlevelを2にする
+
+        //levelが1未満ならlevelを1にする
         if(level < 1){
             level = 1;
         }
-        dungeonDigger = new DungeonDigger( level + 1 );
-        dungeon = new E_DungeonCell[ dungeonDigger.hight - 2 , dungeonDigger.hight - 2 ];
+
+        //ダンジョンデータを取得
+        var path = "Parameta/Dungeon/DungeonDataList";
+        var dataList = Resources.Load(path) as DungeonDataList;
+
+        if(dataList == null){
+            Debug.Log("DungeonDataList : データを読み込めませんでした。");
+        }
+
+        if(level > dataList.MaxLevel){
+            level = dataList.MaxLevel;
+        }
+
+        param = dataList.GetDungeonData(level);
+
+        if(param == null){
+            Debug.Log("DungeonLevel : " + level + " データなし！");
+        }
+
     }
 
 
     public E_DungeonCell[,] MakeDungeon(){
 
+        if(param == null){
+            return null;
+        }
+
+        //ダンジョンを生成
+        var dungeonDigger = new DungeonDigger( param.Level + 1 );
+        dungeonHight = dungeonDigger.hight;
+
         //最低値は2
-        
         var baseDungion = dungeonDigger.DigDungeon();
+
+        dungeon = new E_DungeonCell[ dungeonHight - 2 , dungeonHight - 2 ];
 
         var wallList = new List<Cell>();
         var wayList = new List<Cell>();
 
-        for(int x = 1; x < dungeonDigger.hight - 1; x++){
-            for(int y = 1; y < dungeonDigger.hight - 1; y++){
+        for(int x = 1; x < dungeonHight - 1; x++){
+            for(int y = 1; y < dungeonHight - 1; y++){
                 //外壁の内側をコピーする
                 dungeon[ x - 1 , y - 1 ] = baseDungion[x,y];
 
@@ -43,9 +71,9 @@ public class DungeonMaker{
             }
         }
 
-        //オバケの位置をランダムに決める
+        //普通の道や壁を特殊なマスに置き換える
         //オバケの数を決める
-        int ghostNum = wallList.Count / 10 + 1;
+        int ghostNum = param.MaxGohst;
         Debug.Log( "霊 : " + ghostNum );
         //オバケの数までランダムな壁をゴーストに置き換える
         for(int i = 0 ; i < ghostNum; i++){
@@ -63,7 +91,7 @@ public class DungeonMaker{
 
         //罠の位置をランダムに決める
         //罠の数を決める
-        int trapNum = wallList.Count / 9 + 1;
+        int trapNum = (int) ( param.MaxTrap * Random.Range( 0.8f , 1.2f ) );
         Debug.Log( "罠 : " + trapNum );
         //罠の数までランダムな壁を罠に置き換える
         for(int i = 0 ; i < trapNum; i++){
@@ -78,24 +106,33 @@ public class DungeonMaker{
 
         }
 
-        //アイテムや回復の位置をランダムに決める
-        //アイテムや回復の数を決める
-        int racNum = wayList.Count / 10 + 1;
-        //アイテムや回復の数までランダムな壁をアイテムや回復に置き換える
-        for(int i = 0 ; i < racNum; i++){
+        //アイテムをランダムに決める
+        //アイテムの数を決める
+        int itemNum = (int) ( param.MaxItem * Random.Range( 0.8f , 1.2f ) );
+        //アイテムの数までランダムな道をアイテムに置き換える
+        for(int i = 0 ; i < itemNum; i++){
             //ランダムな座標を取得
             var target = wayList[Random.Range(0,wayList.Count)];
 
-            //回復かアイテムに置き換える
-            if(Random.Range(0.0f,1.0f) < 0.5f){
-                dungeon[ target.x , target.y ] = E_DungeonCell.Item;
-            }else{
-                dungeon[ target.x , target.y ] = E_DungeonCell.Cure;
-            }
+            dungeon[ target.x , target.y ] = E_DungeonCell.Item;
 
             //置き換えた場所を削除
             wayList.Remove(target);
+        }
 
+
+        //回復をランダムに決める
+        //回復の数を決める
+        int cureNum = (int) ( param.MaxCure * Random.Range( 0.8f , 1.2f ) );
+        //回復の数までランダムな道を回復に置き換える
+        for(int i = 0 ; i < cureNum; i++){
+            //ランダムな座標を取得
+            var target = wayList[Random.Range(0,wayList.Count)];
+
+            dungeon[ target.x , target.y ] = E_DungeonCell.Cure;
+
+            //置き換えた場所を削除
+            wayList.Remove(target);
         }
 
         return dungeon;
@@ -113,8 +150,8 @@ public class DungeonMaker{
         string dungeonText = "";
 
         //外壁を戻す
-        for( int x = 0; x < dungeonDigger.hight-2; x++ ){
-            for( int y = 0; y < dungeonDigger.hight-2; y++ ){
+        for( int x = 0; x < dungeonHight - 2 ; x++ ){
+            for( int y = 0; y < dungeonHight - 2 ; y++ ){
                 if(dungeon[x,y] == E_DungeonCell.Wall){
 
                     dungeonText += "■ ";

@@ -21,7 +21,6 @@ namespace My1WeekGameSystems_ver3{
         //シーンが更新された際の処理
         [Inject]
         private void UpdateSceneInjection(I_Pausable pauseAsync , I_SceneLoadNoticable sceneloadAsync){
-
             //ポーズになったらコルーチンを止める
             pauseAsync.PauseAsync.Subscribe((flag)=>{
                 var keys = activeCoroutinDic.Keys;
@@ -100,7 +99,7 @@ namespace My1WeekGameSystems_ver3{
 
         }
 
-        //ポーズによって停止しないコルーチンを開始する：省略用
+        //ポーズによって停止するコルーチンを開始する：省略用
         public static void OrderStartCoroutine(IEnumerator coroutine){
 
             //コルーチンを再開する場合
@@ -110,7 +109,7 @@ namespace My1WeekGameSystems_ver3{
                 return ;
             }
 
-            Coroutine checkerCoroutine = instance.StartCoroutine ( CheckFinishCoroutine( coroutine , false ) );
+            Coroutine checkerCoroutine = instance.StartCoroutine ( CheckFinishCoroutine( coroutine , true ) );
             checkerCoroutineDic.Add( coroutine , checkerCoroutine );
         }
 

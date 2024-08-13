@@ -1,0 +1,32 @@
+@startuml StoryState
+    start 
+
+    repeat
+
+    partition InitStagingState {
+        :Init Staging;
+    }
+
+    partition StoryState {
+        :Story Text 1;
+    }
+
+    partition InGameState {
+        :In Game;
+    }
+
+    if( Level Crear？ )
+    else
+        partition StoryState {
+            :Story Miss Comu ;
+        }
+        break
+    endif
+
+    repeat while( Game Crear ?) is(No) not (yes)
+    partition ResultState {
+        :Display Result;
+    }
+    end    
+
+@enduml

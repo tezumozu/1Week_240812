@@ -1,0 +1,66 @@
+@startuml storyClass
+class StorySceneManager<E_StoryState>{
+
+}
+
+namespace MyGameSystem{
+
+    interface I_Pausable<<MyGameSystem>>{
+
+    }
+
+    abstract GameManager<T><<MyGameSystem>>{
+        - Dictionary< E_StoryState , State >
+    }
+
+}
+
+
+
+abstract class State{
+
+}
+
+interface I_StateUpdatable{
+
+}
+
+class StoryState{
+
+}
+
+class InGame{
+
+}
+
+class InitStaging{
+
+}
+
+abstract class DungeonManager{
+
+}
+
+class StoryDangeonManager{
+
+}
+
+
+enum E_StoryState{
+    Pause
+    Story
+    InitStaging
+    InGame
+    Result
+}
+
+StorySceneManager o-right-> I_StateUpdatable : Observe Fin State
+StorySceneManager -up-|> GameManager
+StorySceneManager -up-|> I_Pausable
+
+StorySceneManager --> DungeonManager : Observe Fin Dungeon
+State -up-|> I_StateUpdatable
+State *-left-> DungeonManager : ゲームオブジェクトの取得
+
+
+@enduml

@@ -13,6 +13,4 @@ public class testMakeDungion : MonoBehaviour{
         Debug.Log(dungeon);
     }
 
-
-
 }

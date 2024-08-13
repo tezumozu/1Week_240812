@@ -1,0 +1,92 @@
+@startuml StateClass
+
+    abstract class DungeonManager{
+
+    }
+
+    class StoryDungeonManager
+
+    interface I_DugeonObjectCreatable{
+        + void CleateDungeon()
+    }
+
+    interface I_GameObjectGettable{
+    }
+
+    interface I_StoryGettable{
+        + CharacterText GetCharacterText()
+        + GetNextStoryData()
+    }
+
+    interface I_ResultGettable{
+        + ResultData GetReultData
+    }
+
+    class ResultData{
+        +int Trun
+        +float Time
+        +int ClearStage
+        +bool IsClear
+    }
+
+    class GameTimer{
+        -Subjct<float> measuredTimeSubject
+    }
+
+    interface I_TimeMeasurable{
+        + IEnumlator StartMeasureTime()
+        + void StopMeasureTime()
+    }
+
+    interface I_GameTimeGettable{
+        +IObservable<float> measuredTimeAsync
+    }
+
+
+
+    class ResultManager{
+
+    }
+
+    class InitStagingState <<State>>{
+
+    }
+
+    class InGame <<State>>{
+
+    }
+
+    class Story <<State>>{
+
+    }
+
+    class StoryResult <<State>>{
+
+    }
+
+    I_DugeonObjectCreatable -left-|> I_GameObjectGettable 
+
+    InitStagingState *--> I_DugeonObjectCreatable
+    InGame *--> I_GameObjectGettable
+    Story *--> I_StoryGettable
+    StoryResult *--> I_ResultGettable
+
+    DungeonManager -up-|> I_DugeonObjectCreatable
+    DungeonManager <|-right- StoryDungeonManager
+    StoryDungeonManager -up-|> I_StoryGettable
+    ResultManager -up-|> I_ResultGettable
+    ResultManager *--> I_GameObjectGettable
+
+    GameObject -up-* DungeonManager
+    I_ResultGettable *-right-> ResultData 
+
+    InGame *-up-> I_TimeMeasurable
+    GameTimer --|> I_TimeMeasurable
+    GameTimer -right-|> I_GameTimeGettable
+    ResultManager -left-> I_GameTimeGettable : Observe
+
+
+
+
+
+@enduml

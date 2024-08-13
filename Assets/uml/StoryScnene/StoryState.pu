@@ -1,0 +1,29 @@
+@startuml StoryState
+
+    state Story{
+    }
+
+    state InGame{
+        state game
+        state pause
+    }
+
+    state Result{
+
+    }
+
+    state InitStaging{
+
+    }
+
+    InitStaging --> Story : Start Game
+    Story -left-> InGame : Start Game
+    InGame -right-> Story : Finish Game
+    Story --> Result : Finish Game
+
+    pause --> game
+    game -up-> pause
+
+
+
+@enduml

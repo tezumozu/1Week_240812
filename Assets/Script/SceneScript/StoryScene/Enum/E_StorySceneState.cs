@@ -4,7 +4,9 @@ using UnityEngine;
 
 public enum E_StorySceneState{
     Story,
+    Prologe,
     InitStaging,
     InGame,
+    FinishStaging,
     Result
 }

@@ -71,10 +71,10 @@ public class DungeonMaker{
             }
         }
 
+
         //普通の道や壁を特殊なマスに置き換える
         //オバケの数を決める
         int ghostNum = param.MaxGohst;
-        Debug.Log( "霊 : " + ghostNum );
         //オバケの数までランダムな壁をゴーストに置き換える
         for(int i = 0 ; i < ghostNum; i++){
             //ランダムな座標を取得
@@ -92,7 +92,6 @@ public class DungeonMaker{
         //罠の位置をランダムに決める
         //罠の数を決める
         int trapNum = (int) ( param.MaxTrap * Random.Range( 0.8f , 1.2f ) );
-        Debug.Log( "罠 : " + trapNum );
         //罠の数までランダムな壁を罠に置き換える
         for(int i = 0 ; i < trapNum; i++){
             //ランダムな座標を取得
@@ -105,6 +104,7 @@ public class DungeonMaker{
             wallList.Remove(target);
 
         }
+
 
         //アイテムをランダムに決める
         //アイテムの数を決める

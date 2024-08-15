@@ -4,13 +4,19 @@
 
     }
 
-    class StoryDungeonManager
+    class StoryDungeonManager{
+
+    }
+
+    class GameBordManager{
+
+    }
 
     interface I_DugeonObjectCreatable{
         + void CleateDungeon()
     }
 
-    interface I_GameObjectGettable{
+    interface I_GameBordCheckable{
     }
 
     interface I_StoryGettable{
@@ -60,32 +66,32 @@
 
     }
 
-    class StoryResult <<State>>{
+    class Result <<State>>{
 
     }
 
-    I_DugeonObjectCreatable -left-|> I_GameObjectGettable 
+    I_GameBordCheckable <|-up- GameBordManager
 
-    InitStagingState *--> I_DugeonObjectCreatable
-    InGame *--> I_GameObjectGettable
-    Story *--> I_StoryGettable
-    StoryResult *--> I_ResultGettable
-
-    DungeonManager -up-|> I_DugeonObjectCreatable
-    DungeonManager <|-right- StoryDungeonManager
-    StoryDungeonManager -up-|> I_StoryGettable
-    ResultManager -up-|> I_ResultGettable
-    ResultManager *--> I_GameObjectGettable
-
-    GameObject -up-* DungeonManager
-    I_ResultGettable *-right-> ResultData 
+    GameTimer --|> I_TimeMeasurable
+    GameTimer --|> I_GameTimeGettable
 
     InGame *-up-> I_TimeMeasurable
-    GameTimer --|> I_TimeMeasurable
-    GameTimer -right-|> I_GameTimeGettable
-    ResultManager -left-> I_GameTimeGettable : Observe
+    InGame *--> I_GameBordCheckable
 
+    InitStagingState *-up-> I_DugeonObjectCreatable
 
+    DungeonManager --> I_DugeonObjectCreatable
+
+    ResultManager *-up-> I_GameTimeGettable : Observe
+    ResultManager *--> DungeonManager : Observe
+    ResultManager --|> I_ResultGettable
+    
+    Result -up-> I_ResultGettable
+
+    StoryDungeonManager --|> DungeonManager
+    StoryDungeonManager --|> I_StoryGettable
+
+    Story *-up-> I_StoryGettable
 
 
 

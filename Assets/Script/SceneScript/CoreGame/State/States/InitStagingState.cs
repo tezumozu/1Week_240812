@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using My1WeekGameSystems_ver3;
 using UniRx;
 using UnityEngine;
 
@@ -14,7 +15,19 @@ public class InitStagingState : State{
     }
 
     public override IEnumerator UpdateState(){
-        Debug.Log("State : Init Staging");
+
+        //ダンジョン生成(ポーズで止まらない)
+        var coroutine = dungeonManager.CreateDungeon();
+        CoroutineHander.OrderStartCoroutine(coroutine,false);
+
+        while(!CoroutineHander.isFinishCoroutine(coroutine)){
+            yield return null;
+        }
+
+        //Blackoutから開ける
+        //ダンジョンが生成されるアニメーションを再生
+        //ゲーム開始の演出
+        
         yield return null;
         finishStateSubject.OnNext(Unit.Default);
     }

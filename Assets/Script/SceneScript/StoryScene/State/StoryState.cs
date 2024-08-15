@@ -3,13 +3,11 @@ using System.Collections.Generic;
 using UniRx;
 using UnityEngine;
 
-//ストーリー進行時の処理、テキスト表示など
 public class StoryState : State{
+    private I_StoryGettable storyManager;
 
-    I_StoryGettable dungeonManager;
-
-    public StoryState (I_StoryGettable dungeonManager){
-        this.dungeonManager = dungeonManager;
+    public StoryState (I_StoryGettable storyManager){
+        this.storyManager = storyManager;
     }
 
     public override IEnumerator UpdateState(){

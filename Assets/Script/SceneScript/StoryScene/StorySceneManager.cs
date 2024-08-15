@@ -30,20 +30,29 @@ public class StorySceneManager : GameManager<E_StorySceneState> , I_Pausable {
 
         //オブジェクトを生成、初期化、インジェクション
         var timer = new InGameTimer();
-        var dungeonManager = new StoryDungeonManager();
-        var resultManager = new ResultManager(dungeonManager,timer);
+        var gameBord = new GameBordManager();
+        var dungeonManager = new StoryDungeonManager(gameBord);
+        var resultManager = new ResultManager(gameBord,timer);
 
         var initStaging = new InitStagingState(dungeonManager);
         stateDic.Add(E_StorySceneState.InitStaging,initStaging);
 
-        var story = new StoryState(dungeonManager);
-        stateDic.Add(E_StorySceneState.Story,story);
-
-        var inGame = new InGameState(dungeonManager,timer);
+        var inGame = new InGameState(gameBord,timer);
         stateDic.Add(E_StorySceneState.InGame,inGame);
 
-        var result = new StoryResultState(resultManager);
+        var finishStaging = new FinishStagingState();
+        stateDic.Add(E_StorySceneState.FinishStaging,finishStaging);
+
+        var result = new ResultState(resultManager);
         stateDic.Add(E_StorySceneState.Result,result);
+
+
+        //ストーリー専用
+        var prologe = new StoryPrologeState(dungeonManager);
+        stateDic.Add(E_StorySceneState.Prologe,prologe);
+
+        var story = new StoryState(dungeonManager);
+        stateDic.Add(E_StorySceneState.Story,story);
 
         //ゲームの終了を監視する
         var disposable = dungeonManager.FinishDungeonAsync.Subscribe((_)=>{
@@ -51,6 +60,7 @@ public class StorySceneManager : GameManager<E_StorySceneState> , I_Pausable {
         });
 
         //ポーズが入力されたらポーズにする <-> ポーズを解除する
+
 
         disposableList.Add(disposable);
 
@@ -61,24 +71,26 @@ public class StorySceneManager : GameManager<E_StorySceneState> , I_Pausable {
     //ゲームを開始するコルーチン
     public IEnumerator GameMain(){
 
+        //prologe
+        currentState = E_StorySceneState.Prologe;
+        UpdateStateSubject.OnNext(currentState);
+        var coroutine = stateDic[currentState].UpdateState();
+
+        //コルーチンを開始する
+        CoroutineHander.OrderStartCoroutine(coroutine);
+        //コルーチンの終了を待機する
+        while(!CoroutineHander.isFinishCoroutine(coroutine)){
+            yield return null;
+        }
+
+
         //ゲームが終了するまで
         while(!isGameFin){
 
             //InitStaging
-            UpdateStateSubject.OnNext(E_StorySceneState.InitStaging);
-            var coroutine = stateDic[E_StorySceneState.InitStaging].UpdateState();
-
-            //コルーチンを開始する
-            CoroutineHander.OrderStartCoroutine(coroutine);
-            //コルーチンの終了を待機する
-            while(!CoroutineHander.isFinishCoroutine(coroutine)){
-                yield return null;
-            }
-
-
-            //StoryState
-            UpdateStateSubject.OnNext(E_StorySceneState.Story);
-            coroutine = stateDic[E_StorySceneState.Story].UpdateState();
+            currentState = E_StorySceneState.InitStaging;
+            UpdateStateSubject.OnNext(currentState);
+            coroutine = stateDic[currentState].UpdateState();
 
             //コルーチンを開始する
             CoroutineHander.OrderStartCoroutine(coroutine);
@@ -89,8 +101,9 @@ public class StorySceneManager : GameManager<E_StorySceneState> , I_Pausable {
 
 
             //InGame
-            UpdateStateSubject.OnNext(E_StorySceneState.InGame);
-            coroutine = stateDic[E_StorySceneState.InGame].UpdateState();
+            currentState = E_StorySceneState.InGame;
+            UpdateStateSubject.OnNext(currentState);
+            coroutine = stateDic[currentState].UpdateState();
 
             //コルーチンを開始する
             CoroutineHander.OrderStartCoroutine(coroutine);
@@ -101,8 +114,22 @@ public class StorySceneManager : GameManager<E_StorySceneState> , I_Pausable {
 
 
             //Story
-            UpdateStateSubject.OnNext(E_StorySceneState.Story);
-            coroutine = stateDic[E_StorySceneState.Story].UpdateState();
+            currentState = E_StorySceneState.Story;
+            UpdateStateSubject.OnNext(currentState);
+            coroutine = stateDic[currentState].UpdateState();
+
+            //コルーチンを開始する
+            CoroutineHander.OrderStartCoroutine(coroutine);
+            //コルーチンの終了を待機する
+            while(!CoroutineHander.isFinishCoroutine(coroutine)){
+                yield return null;
+            }
+
+
+            //FinishStaging
+            currentState = E_StorySceneState.FinishStaging;
+            UpdateStateSubject.OnNext(currentState);
+            coroutine = stateDic[currentState].UpdateState();
 
             //コルーチンを開始する
             CoroutineHander.OrderStartCoroutine(coroutine);
@@ -114,13 +141,14 @@ public class StorySceneManager : GameManager<E_StorySceneState> , I_Pausable {
 
 
         //Result
-        UpdateStateSubject.OnNext(E_StorySceneState.Result);
-        var resultCoroutine = stateDic[E_StorySceneState.Result].UpdateState();
+        currentState = E_StorySceneState.Result;
+        UpdateStateSubject.OnNext(currentState);
+        coroutine = stateDic[currentState].UpdateState();
 
         //コルーチンを開始する
-        CoroutineHander.OrderStartCoroutine(resultCoroutine);
+        CoroutineHander.OrderStartCoroutine(coroutine);
         //コルーチンの終了を待機する
-        while(!CoroutineHander.isFinishCoroutine(resultCoroutine)){
+        while(!CoroutineHander.isFinishCoroutine(coroutine)){
             yield return null;
         }
 

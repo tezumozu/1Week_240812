@@ -7,11 +7,11 @@ using UniRx;
 public class InGameState : State{
 
     I_TimeMeasurable Timer;
-    I_GameObjectGettable dungeonManager;
+    I_GameBordChackable bordManager;
 
-    public InGameState (I_GameObjectGettable dungeonManager, I_TimeMeasurable Timer){
+    public InGameState (I_GameBordChackable bordManager, I_TimeMeasurable Timer){
         this.Timer = Timer;
-        this.dungeonManager = dungeonManager;
+        this.bordManager = bordManager;
     }
 
     public override IEnumerator UpdateState(){

@@ -6,10 +6,16 @@ using Zenject;
 
 public class DungeonMaker{
     E_DungeonCell[,] dungeon;
-    int dungeonHight = 0;
+    public int DungeonHight 
+    { 
+        get;
+        private set;
+        
+    }
     DungeonData param;
 
     public DungeonMaker(int level){
+        DungeonHight = 0;
 
         //levelが1未満ならlevelを1にする
         if(level < 1){
@@ -45,18 +51,18 @@ public class DungeonMaker{
 
         //ダンジョンを生成
         var dungeonDigger = new DungeonDigger( param.Level + 1 );
-        dungeonHight = dungeonDigger.hight;
+        DungeonHight = dungeonDigger.hight;
 
         //最低値は2
         var baseDungion = dungeonDigger.DigDungeon();
 
-        dungeon = new E_DungeonCell[ dungeonHight - 2 , dungeonHight - 2 ];
+        dungeon = new E_DungeonCell[ DungeonHight - 2 , DungeonHight - 2 ];
 
         var wallList = new List<Cell>();
         var wayList = new List<Cell>();
 
-        for(int x = 1; x < dungeonHight - 1; x++){
-            for(int y = 1; y < dungeonHight - 1; y++){
+        for(int x = 1; x < DungeonHight - 1; x++){
+            for(int y = 1; y < DungeonHight - 1; y++){
                 //外壁の内側をコピーする
                 dungeon[ x - 1 , y - 1 ] = baseDungion[x,y];
 
@@ -150,8 +156,8 @@ public class DungeonMaker{
         string dungeonText = "";
 
         //外壁を戻す
-        for( int x = 0; x < dungeonHight - 2 ; x++ ){
-            for( int y = 0; y < dungeonHight - 2 ; y++ ){
+        for( int x = 0; x < DungeonHight - 2 ; x++ ){
+            for( int y = 0; y < DungeonHight - 2 ; y++ ){
                 if(dungeon[x,y] == E_DungeonCell.Wall){
 
                     dungeonText += "■ ";

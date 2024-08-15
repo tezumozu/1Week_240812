@@ -8,5 +8,6 @@ public enum E_StorySceneState{
     InitStaging,
     InGame,
     FinishStaging,
+    Pause,
     Result
 }

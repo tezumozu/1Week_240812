@@ -5,7 +5,7 @@ using My1WeekGameSystems_ver3;
 using UnityEngine;
 
 public class ResultManager : I_ResultGettable{
-    public ResultManager (I_GameBordChackable bordManager , I_InGameTimeObservable Timer){
+    public ResultManager (I_GameBoardChackable boardManager , I_InGameTimeObservable Timer){
 
     }
 

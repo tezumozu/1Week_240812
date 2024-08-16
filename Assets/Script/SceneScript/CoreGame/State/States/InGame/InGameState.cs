@@ -61,7 +61,7 @@ public class InGameState : State{
 
 
         //ゲームが終了するまで( ライフ0 か ゴール か)
-        while(!isGameFin){
+        //while(!isGameFin){
 
             //入力待ち
             var coroutine = inputManager.GetPlayerOrder();
@@ -79,7 +79,7 @@ public class InGameState : State{
                 yield return null;
             }
 
-        }
+        //}
 
 
         //タイマーを停止

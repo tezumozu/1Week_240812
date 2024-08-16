@@ -77,6 +77,9 @@ public class DungeonMaker{
             }
         }
 
+        //壁の内側分の高さへ変更
+        DungeonHight = DungeonHight - 2;
+
 
         //普通の道や壁を特殊なマスに置き換える
         //オバケの数を決める
@@ -156,8 +159,8 @@ public class DungeonMaker{
         string dungeonText = "";
 
         //外壁を戻す
-        for( int x = 0; x < DungeonHight - 2 ; x++ ){
-            for( int y = 0; y < DungeonHight - 2 ; y++ ){
+        for( int x = 0; x < DungeonHight ; x++ ){
+            for( int y = 0; y < DungeonHight ; y++ ){
                 if(dungeon[x,y] == E_DungeonCell.Wall){
 
                     dungeonText += "■ ";

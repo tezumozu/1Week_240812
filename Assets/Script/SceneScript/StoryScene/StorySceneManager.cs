@@ -35,8 +35,9 @@ public class StorySceneManager : GameManager<E_StorySceneState> , I_Pausable {
         var timer = new InGameTimer();
         var gameBoard = new GameBoardManager();
         var dungeonManager = new StoryDungeonManager(gameBoard);
-        var resultManager = new ResultManager(gameBoard,timer);
+        var resultManager = new StoryResultManager(dungeonManager);
         var blackOutStaiging = new BlackOutAnimManager();
+        var textBox = new TextBoxManager();
 
         //入力系
         var StoryInput = new StoryInputTranslater<E_StorySceneState>(this,E_StorySceneState.Story);
@@ -58,10 +59,10 @@ public class StorySceneManager : GameManager<E_StorySceneState> , I_Pausable {
 
 
         //ストーリー専用
-        var prologe = new StoryPrologeState(dungeonManager,StoryInput);
+        var prologe = new StoryPrologeState(dungeonManager,StoryInput,blackOutStaiging,textBox);
         stateDic.Add(E_StorySceneState.Prologe,prologe);
 
-        var story = new StoryState(dungeonManager,StoryInput);
+        var story = new StoryState(dungeonManager,StoryInput,textBox);
         stateDic.Add(E_StorySceneState.Story,story);
 
         //ゲームの終了を監視する

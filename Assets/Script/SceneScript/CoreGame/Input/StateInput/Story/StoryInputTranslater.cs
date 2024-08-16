@@ -16,4 +16,9 @@ where T : Enum
     protected override void SetActive(bool flag){
 
     }
+
+    public IEnumerator WaitPlayerInput(){
+        Debug.Log("StoryInputTranslater : 入力待ち");
+        yield return null;
+    }
 }

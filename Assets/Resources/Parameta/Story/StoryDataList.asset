@@ -15,7 +15,13 @@ MonoBehaviour:
   chapterList:
   - chapterTexts:
     - Face: 0
-      texts: []
+      texts:
+      - "\u3053\u308C\u306F"
+      - "\u3066\u3059\u3068"
+    - Face: 0
+      texts:
+      - "\u30C6\u30B9\u30C8"
+      - "\u30C6\u30B9\u30C8\u30C6\u30B9\u30C8"
     - Face: 0
       texts: []
     DungeonLevel: 1
@@ -26,4 +32,12 @@ MonoBehaviour:
   - chapterTexts: []
     DungeonLevel: 3
     ChapterNum: 3
-  prologeTexts: []
+  prologeTexts:
+  - Face: 0
+    texts:
+    - "\u3053\u308C\u306F\u30D7\u30ED\u30ED\u30FC\u30B0"
+  loseTexts:
+  - Face: 0
+    texts:
+    - "\u3053\u308C\u306F\u6557\u5317\u6642"
+    - "\u30C6\u30B9\u30C8"

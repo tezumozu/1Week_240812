@@ -78,4 +78,17 @@ public class StoryDungeonManager : DungeonManager , I_StoryGettable {
         yield return null;
 
     }
+
+
+    public IReadOnlyCollection<Lines> GetStoryList(){
+        //負けなら敗北時ストーリーを渡す
+        if(isClear){
+            return currentChapter.ChapterTexts;
+        }
+        return chaperList.LoseTexts;
+    }
+
+    public IReadOnlyCollection<Lines> GetProloge(){
+        return chaperList.PrologeTexts;
+    }
 }

@@ -14,4 +14,8 @@ where T : Enum
     protected override void SetActive(bool flag){
 
     }
+
+    public IEnumerator WaitPlayerInput(){
+        yield return null;
+    }
 }

@@ -12,7 +12,11 @@ public class StoryDataList : ScriptableObject{
     [SerializeField]
     private List<Lines> prologeTexts = new List<Lines>();
 
+    [SerializeField]
+    private List<Lines> loseTexts = new List<Lines>();
+
     public IReadOnlyCollection<Lines> PrologeTexts => prologeTexts;
+    public IReadOnlyCollection<Lines> LoseTexts => loseTexts;
 
     public Chapter GetChapter(int chapterNum){
 

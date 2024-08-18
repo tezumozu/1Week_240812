@@ -11,7 +11,7 @@ using System.Runtime.CompilerServices;
 public class InGameState : State{
 
     I_TimeMeasurable Timer;
-    I_GameBoardChackable boardManager;
+    I_GameFinishCheckable boardManager;
     I_InGameInputTranslatable inputManager;
     private bool isGameFin;
     private I_OrderExecutionable order;
@@ -19,7 +19,7 @@ public class InGameState : State{
     
 
     //ゲームにおける一連の流れを整理
-    public InGameState (I_GameBoardChackable boardManager, I_TimeMeasurable Timer , I_InGameInputTranslatable inputManager){
+    public InGameState (I_GameFinishCheckable boardManager, I_TimeMeasurable Timer , I_InGameInputTranslatable inputManager){
         this.Timer = Timer;
         this.boardManager = boardManager;
         this.inputManager = inputManager;
@@ -28,10 +28,8 @@ public class InGameState : State{
 
 
         //もしライフをすべて失ったらゲームを終了する
-        var disposable = boardManager.LifeLoseAsync.Subscribe(life => {
-            if(life <= 0){
-                isGameFin = true;
-            }
+        var disposable = boardManager.GameFinishAsync.Subscribe(isClear => {
+            isGameFin = true;
         });
 
         disposableList.Add(disposable);
@@ -54,6 +52,8 @@ public class InGameState : State{
         disposableList.Add(disposable);
     }
 
+    
+
     public override IEnumerator UpdateState(){
 
         //タイマーを起動 (ポーズで終了しない)
@@ -61,7 +61,7 @@ public class InGameState : State{
 
 
         //ゲームが終了するまで( ライフ0 か ゴール か)
-        //while(!isGameFin){
+        while(!isGameFin){
 
             //入力待ち
             var coroutine = inputManager.GetPlayerOrder();
@@ -79,7 +79,7 @@ public class InGameState : State{
                 yield return null;
             }
 
-        //}
+        }
 
 
         //タイマーを停止

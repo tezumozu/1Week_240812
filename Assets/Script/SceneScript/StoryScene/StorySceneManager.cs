@@ -29,13 +29,13 @@ public class StorySceneManager : GameManager<E_StorySceneState> , I_Pausable {
 
 
     public override void InitObject(){
+
         Debug.Log("GameManager : Init");
 
         //オブジェクトを生成、初期化、インジェクション
         var timer = new InGameTimer();
-        var gameBoard = new GameBoardManager();
-        var dungeonManager = new StoryDungeonManager(gameBoard);
-        var resultManager = new StoryResultManager(dungeonManager);
+        var gameBoardManager = new StoryGameBoardManager();
+        var resultManager = new StoryResultManager(gameBoardManager);
         var blackOutStaiging = new BlackOutAnimManager();
         var textBox = new TextBoxManager();
 
@@ -45,10 +45,10 @@ public class StorySceneManager : GameManager<E_StorySceneState> , I_Pausable {
         var InGameInput = new InGameInputTranslater<E_StorySceneState>(this,E_StorySceneState.InGame);
         var ResultInput = new ResultInputTranslater<E_StorySceneState>(this,E_StorySceneState.Result);
 
-        var initStaging = new InitStagingState(dungeonManager,blackOutStaiging,gameBoard);
+        var initStaging = new InitStagingState(gameBoardManager,blackOutStaiging);
         stateDic.Add(E_StorySceneState.InitStaging,initStaging);
 
-        var inGame = new InGameState(gameBoard,timer,InGameInput);
+        var inGame = new InGameState(gameBoardManager,timer,InGameInput);
         stateDic.Add(E_StorySceneState.InGame,inGame);
 
         var finishStaging = new FinishStagingState(blackOutStaiging);
@@ -59,14 +59,14 @@ public class StorySceneManager : GameManager<E_StorySceneState> , I_Pausable {
 
 
         //ストーリー専用
-        var prologe = new StoryPrologeState(dungeonManager,StoryInput,blackOutStaiging,textBox);
+        var prologe = new StoryPrologeState(gameBoardManager,StoryInput,blackOutStaiging,textBox);
         stateDic.Add(E_StorySceneState.Prologe,prologe);
 
-        var story = new StoryState(dungeonManager,StoryInput,textBox);
+        var story = new StoryState(gameBoardManager,StoryInput,textBox);
         stateDic.Add(E_StorySceneState.Story,story);
 
         //ゲームの終了を監視する
-        var disposable = dungeonManager.FinishDungeonAsync.Subscribe((_)=>{
+        var disposable = gameBoardManager.GameFinishAsync.Subscribe((_)=>{
             isGameFin = true;
         });
 

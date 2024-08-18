@@ -1,0 +1,100 @@
+@startuml InGameClass
+
+    class InGameState{
+
+    }
+
+    class InGameInputTranslater{
+        - Dictionary< E_InGameInputMode , InputMode> UIList
+    }
+
+    abstract class InputMode{
+
+    }
+
+    interface I_InputModeUpdatable{
+        public IObservable<I_OrderExecutionable> PlayerOrderAsync {get;}
+        public abstract IEnumerator GetPlayerOrder();
+        public IObservable<E_InGameInputMode> ChangeInputModeAsync {get}
+    }
+
+    interface I_InGameInputTranslatable{
+        + IObservable<OrderProcess> PlayerInputAsync{get}
+        + SetActive(bool flag)
+    }
+
+    interface I_OrderExecutionable{
+
+    }
+
+    class OrderProcess{
+
+    }
+
+    interface I_GameFinishCheckable{
+        + IObservable<bool> GameFinishAsync
+    }
+
+    class GameBoardManager{
+
+    }
+
+    class GameBoard<< MonoBehaviour >>{
+        - Tile currentTile
+        - Tile[,] TileList
+
+        + IObservable<Unit> PlayerGoalAsync
+        + IObservable<Unit> PlayerLifeLostAsync
+        + void CreateBoard()
+    }
+
+    class GoOnInputMode{
+
+    }
+
+    class Tile << MonoBehaviour >> {
+        - List<Tile> relatedTile
+        - bool isClickable
+    }
+
+    interface I_CameraTargetable{
+        + void TargetThis(Camera camera)
+    }
+
+
+    InGameInputTranslater -left-|> I_InGameInputTranslatable
+    InGameInputTranslater -up-> OrderProcess
+    InGameInputTranslater o-right-> I_InputModeUpdatable
+
+    InputMode -down-> I_InputModeUpdatable
+
+    InGameState -right-> I_OrderExecutionable
+    InGameState --> I_InGameInputTranslatable
+    InGameState -up-> I_GameFinishCheckable
+
+    GameBoardManager -right-|> I_GameFinishCheckable
+    GameBoardManager *-up-> GameBoard
+
+    OrderProcess -left-|> I_OrderExecutionable
+
+    InputMode -left-> OrderProcess
+
+    GameBoard o-up-> Tile
+    GameBoard -up-|> I_CameraTargetable
+
+    GoOnInputMode -down-|> InputMode
+    GoOnInputMode -left-> GameBoard
+    GoOnInputMode -up-> I_CameraTargetable
+
+    Tile -right-|> I_CameraTargetable
+
+    I_CameraTargetable -right-> Camera
+
+
+
+
+
+    
+    
+
+@enduml

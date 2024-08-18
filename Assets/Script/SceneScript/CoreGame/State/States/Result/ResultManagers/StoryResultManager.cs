@@ -4,15 +4,16 @@ using UnityEngine;
 
 public class StoryResultManager : ResultManager{
 
-    I_DungeonCheckable dungeonManager;
+    I_GameFinishCheckable gameBoardManager;
 
-    public StoryResultManager(I_DungeonCheckable dungeonManager){
-        this.dungeonManager = dungeonManager;
+    public StoryResultManager(I_GameFinishCheckable gameBoardManager){
+        this.gameBoardManager = gameBoardManager;
     }
 
     public override void SetActive(bool flag){
 
     }
+    
     public override IEnumerator ResultAnim(){
         yield return null;
     }

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public interface I_GameBoardChackable {
-    public IObservable<int> LifeLoseAsync {get;}
+    public IObservable<int> LifeLostAsync {get;}
     public IObservable<int> PlayerGoalAsync {get;}
 
 }

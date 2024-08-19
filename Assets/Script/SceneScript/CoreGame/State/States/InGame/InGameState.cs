@@ -42,14 +42,6 @@ public class InGameState : State{
 
         disposableList.Add(disposable);
 
-        
-
-        //入力を受けた時の処理
-        disposable = inputManager.PlayerOrderAsync.Subscribe(order => {
-            this.order = order;
-        });
-
-        disposableList.Add(disposable);
     }
 
     
@@ -63,21 +55,24 @@ public class InGameState : State{
         //ゲームが終了するまで( ライフ0 か ゴール か)
         while(!isGameFin){
 
-            //入力待ち
-            var coroutine = inputManager.GetPlayerOrder();
+            //デフォルトの入力モードを有効にする
+            inputManager.ToActiveMode(E_InGameInputMode.GoOn);
+
+            //入力 -> 処理の流れを待つ
+            var coroutine = inputManager.TakeTurn();
             CoroutineHander.OrderStartCoroutine(coroutine);
 
             while(!CoroutineHander.isFinishCoroutine(coroutine)){
                 yield return null;
             }
 
-            //アクションの処理
+            /*//アクションの処理
             coroutine = order.OrderExecution();
             CoroutineHander.OrderStartCoroutine(coroutine);
 
             while(!CoroutineHander.isFinishCoroutine(coroutine)){
                 yield return null;
-            }
+            }*/
 
         }
 

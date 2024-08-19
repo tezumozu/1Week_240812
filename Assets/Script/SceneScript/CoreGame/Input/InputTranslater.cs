@@ -19,6 +19,8 @@ where T: Enum
 
     protected InputTranslater (I_GameStateUpdatable<T> gameManager , T activeState){
 
+        disposableList = new List<IDisposable>();
+
         isActiveStateList = new HashSet<T>();
         //デフォルトのアクティブ状態を設定
         isActiveStateList.Add(activeState);
@@ -38,6 +40,7 @@ where T: Enum
             SetActive(false);
         });
 
+        disposableList.Add(disposable);
     }
 
     public void AddActiveState(T state){

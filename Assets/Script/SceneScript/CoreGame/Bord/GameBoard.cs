@@ -22,6 +22,7 @@ public class GameBoard: MonoBehaviour , I_GameBoardChackable , I_BoardUpdatable 
     int dungeonHight;
 
     Tile[,] tileList;
+    Tile currentTile;
 
     //
     private Subject<int> lifeLostSubject = new Subject<int>();
@@ -31,6 +32,8 @@ public class GameBoard: MonoBehaviour , I_GameBoardChackable , I_BoardUpdatable 
     private Subject<int> playerGoalSubject = new Subject<int>();
     public IObservable<int> PlayerGoalAsync => playerGoalSubject; 
 
+    private Subject<Tile> clickedTileSubject = new Subject<Tile>();
+    public IObservable<Tile> clickedTileAsync => clickedTileSubject; 
 
 
 
@@ -55,13 +58,7 @@ public class GameBoard: MonoBehaviour , I_GameBoardChackable , I_BoardUpdatable 
         }
         
 
-        //プレハブの読み込み
-        var path = "Prefab/InGame/SampleTile";
-        var TilePrefab = Resources.Load(path);
-
-        if(TilePrefab == null){
-            Debug.Log("GameBoardManager : 読み込み失敗");
-        }
+        var TileFactory = new TileFactory();
 
 
         //追加する
@@ -72,8 +69,7 @@ public class GameBoard: MonoBehaviour , I_GameBoardChackable , I_BoardUpdatable 
                 var tile_x = ( x % hight - hight / 2 ) * (tileSize + tileDistance);
                 var tile_y = ( y % hight - hight / 2 ) * (tileSize + tileDistance);
 
-                //インスタンス生成
-                var tileObject = ( GameObject ) GameObject.Instantiate(TilePrefab);
+                var tileObject = TileFactory.CreateObject(data[x,y]);
 
                 //子オブジェクトに追加
                 tileObject.transform.parent = gameObject.transform;
@@ -82,6 +78,16 @@ public class GameBoard: MonoBehaviour , I_GameBoardChackable , I_BoardUpdatable 
                 tileObject.transform.Translate(tile_x , 0.0f , -tile_y , Space.Self);
 
                 tileList[x,y] = tileObject.GetComponent<Tile>();
+
+                if(data[x,y] == E_DungeonCell.Start){
+                    currentTile = tileList[x,y];
+                }
+
+                tileList[x,y].ClickAsync.Subscribe( tile => {
+
+                    clickedTileSubject.OnNext(tile);
+
+                }).AddTo(this);
 
             }    
         }
@@ -105,6 +111,13 @@ public class GameBoard: MonoBehaviour , I_GameBoardChackable , I_BoardUpdatable 
             }    
         }
 
+    }
+
+
+    public void SetIsClickable(bool flag){
+        foreach(var tile in currentTile.RelatedTileList){
+            tile.SetIsClickable(flag);
+        }
     }
 
 

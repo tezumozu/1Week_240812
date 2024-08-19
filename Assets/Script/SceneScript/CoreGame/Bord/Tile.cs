@@ -1,24 +1,55 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
+using UniRx;
 using UnityEngine;
+using UnityEngine.EventSystems;
+using Zenject;
 using Zenject.Asteroids;
 
-public class Tile : MonoBehaviour , I_CameraTargettable{
+public abstract class Tile :
+MonoBehaviour ,
+I_CameraTargettable ,
+I_FactoryMakable , 
+IPointerClickHandler , 
+IPointerEnterHandler , 
+IPointerExitHandler {
 
     [SerializeField]
-    float CameraRange = 5.0f;
+    protected float CameraRange = 3.0f;
 
-    List<Tile> relatedTileList = new List<Tile>();
-    bool isClicked;
+    [SerializeField]
+    protected GameObject MouseOverEffect;
 
-    private void Start(){
-        isClicked = false;
+    protected List<Tile> relatedTileList = new List<Tile>();
+    public IReadOnlyCollection<Tile> RelatedTileList => relatedTileList;
+
+
+    public E_DungeonCell type {
+        get;
+        private set;
     }
 
+    protected bool isClickable;
+    protected bool isTurnable;
+    protected bool isWarkable;
+
+
+    protected Subject<Tile> ClickSubject = new Subject<Tile>();
+    public IObservable<Tile> ClickAsync => ClickSubject;
+
+
+
+    private void Start(){
+        isClickable = false;
+        MouseOverEffect.SetActive(false);
+        isTurnable = true;
+        isWarkable = false;
+    }
+
+
     //カメラを特定の位置に移動させる
-    public IEnumerator TargetThis(GameObject camera){
+    public virtual IEnumerator TargetThis(GameObject camera){
 
         var point = (float) Math.Sqrt(2) * CameraRange;
         var NextPos = transform.position;
@@ -33,8 +64,44 @@ public class Tile : MonoBehaviour , I_CameraTargettable{
 
     }
 
+
+    //周辺のタイルを覚えておく
     public void AddRelatedTile(Tile relatedTile){
         relatedTileList.Add(relatedTile);
+    }
+
+
+
+    //クリックできるように変更する
+    public virtual void SetIsClickable(bool flag){
+        isClickable = flag;
+    }
+
+
+
+    //クリックされたとき
+    public void OnPointerClick(PointerEventData eventData){
+        if(!isClickable) return;
+    }
+
+
+
+    //マウスオーバー
+    public void OnPointerEnter(PointerEventData eventData){
+        if(!isClickable) return;
+        MouseOverEffect.SetActive(true);
+    }
+
+    public void OnPointerExit(PointerEventData eventData){
+        if(!isClickable) return;
+        MouseOverEffect.SetActive(false);
+    }
+
+
+    //クリックされたときの処理
+    protected virtual void MouseClick(){
+        print($"オブジェクト {name} がクリックされたよ！");
+        ClickSubject.OnNext(this);
     }
 
 }

@@ -12,14 +12,14 @@ public class InGameState : State{
 
     I_TimeMeasurable Timer;
     I_GameFinishCheckable boardManager;
-    I_InGameInputTranslatable inputManager;
+    I_InGameTurnUpdatable inputManager;
     private bool isGameFin;
     private I_OrderExecutionable order;
 
     
 
     //ゲームにおける一連の流れを整理
-    public InGameState (I_GameFinishCheckable boardManager, I_TimeMeasurable Timer , I_InGameInputTranslatable inputManager){
+    public InGameState (I_GameFinishCheckable boardManager, I_TimeMeasurable Timer , I_InGameTurnUpdatable inputManager){
         this.Timer = Timer;
         this.boardManager = boardManager;
         this.inputManager = inputManager;
@@ -52,11 +52,8 @@ public class InGameState : State{
         CoroutineHander.OrderStartCoroutine(Timer.StartMeasureTime(),false);
 
 
-        //ゲームが終了するまで( ライフ0 か ゴール か)
+        //ゲームが終了するまでターンを繰り返す( ライフ0 か ゴール か)
         while(!isGameFin){
-
-            //デフォルトの入力モードを有効にする
-            inputManager.ToActiveMode(E_InGameInputMode.GoOn);
 
             //入力 -> 処理の流れを待つ
             var coroutine = inputManager.TakeTurn();
@@ -65,14 +62,6 @@ public class InGameState : State{
             while(!CoroutineHander.isFinishCoroutine(coroutine)){
                 yield return null;
             }
-
-            /*//アクションの処理
-            coroutine = order.OrderExecution();
-            CoroutineHander.OrderStartCoroutine(coroutine);
-
-            while(!CoroutineHander.isFinishCoroutine(coroutine)){
-                yield return null;
-            }*/
 
         }
 

@@ -10,7 +10,7 @@ using UnityEngine;
 using Zenject;
 
 //プレイヤーの駒やタイルを管理する、盤面の状態を報告する
-public class GameBoard: MonoBehaviour , I_GameBoardChackable , I_BoardUpdatable , I_CameraTargettable{
+public class GameBoard: MonoBehaviour , I_GameBoardChackable , I_CameraTargettable , I_BoardClickable{
 
     //ボードを見渡す際のカメラとの距離
     float CameraRange = 10;
@@ -24,7 +24,9 @@ public class GameBoard: MonoBehaviour , I_GameBoardChackable , I_BoardUpdatable 
     Tile[,] tileList;
     Tile currentTile;
 
-    //
+
+
+    //ライフがなくなったときに通知する
     private Subject<int> lifeLostSubject = new Subject<int>();
     public IObservable<int> LifeLostAsync => lifeLostSubject; 
 
@@ -32,8 +34,9 @@ public class GameBoard: MonoBehaviour , I_GameBoardChackable , I_BoardUpdatable 
     private Subject<int> playerGoalSubject = new Subject<int>();
     public IObservable<int> PlayerGoalAsync => playerGoalSubject; 
 
+    //クリックされたTileを返す
     private Subject<Tile> clickedTileSubject = new Subject<Tile>();
-    public IObservable<Tile> clickedTileAsync => clickedTileSubject; 
+    public IObservable<Tile> ClickedTileAsync => clickedTileSubject; 
 
 
 
@@ -114,27 +117,29 @@ public class GameBoard: MonoBehaviour , I_GameBoardChackable , I_BoardUpdatable 
     }
 
 
-    public void SetIsClickable(bool flag){
+    public void SetClickable(bool flag){
         foreach(var tile in currentTile.RelatedTileList){
             tile.SetIsClickable(flag);
         }
-    }
-
-
-
-    public IEnumerator StartInitStagingAnim(){
-        //
-        Debug.Log("GameBoardManager : ボードが生成されるアニメーション");
 
         //カメラをスタート地点へ
         var Camera = GameObject.Find("MainCamera");
         var coroutine = tileList[0,0].TargetThis(Camera);
-
         CoroutineHander.OrderStartCoroutine(coroutine);
-        while(CoroutineHander.isFinishCoroutine(coroutine)){
-            yield return null;
-        }
     }
+
+
+
+
+    //アニメ
+    public IEnumerator StartInitStagingAnim(){
+        //
+        Debug.Log("GameBoardManager : ボードが生成されるアニメーション");
+        yield return null;
+        
+    }
+
+
 
     //カメラを特定の位置に移動させる
     public IEnumerator TargetThis(GameObject camera){

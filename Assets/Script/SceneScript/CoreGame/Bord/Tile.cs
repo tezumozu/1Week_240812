@@ -11,6 +11,7 @@ public abstract class Tile :
 MonoBehaviour ,
 I_CameraTargettable ,
 I_FactoryMakable , 
+I_TileEffectable , 
 IPointerClickHandler , 
 IPointerEnterHandler , 
 IPointerExitHandler {
@@ -37,8 +38,6 @@ IPointerExitHandler {
 
     protected Subject<Tile> ClickSubject = new Subject<Tile>();
     public IObservable<Tile> ClickAsync => ClickSubject;
-
-
 
     private void Start(){
         isClickable = false;
@@ -82,7 +81,12 @@ IPointerExitHandler {
     //クリックされたとき
     public void OnPointerClick(PointerEventData eventData){
         if(!isClickable) return;
+        MouseClick();
     }
+
+
+    //タイルが裏返されたときの処理
+    public abstract IEnumerator TileEffect();
 
 
 
@@ -101,6 +105,8 @@ IPointerExitHandler {
     //クリックされたときの処理
     protected virtual void MouseClick(){
         print($"オブジェクト {name} がクリックされたよ！");
+        isClickable = false;
+        MouseOverEffect.SetActive(false);
         ClickSubject.OnNext(this);
     }
 

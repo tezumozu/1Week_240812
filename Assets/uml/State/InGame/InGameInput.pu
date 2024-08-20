@@ -1,0 +1,42 @@
+@startuml
+
+    class GoOnInputMode{}
+
+    class ItemInputMode{}
+
+    class ItemManager{}
+
+    abstract class Item{}
+
+    class GameBoard{}
+
+    abstract class Tile {}
+
+    class TurnManager{}
+
+    class OrderManager{}
+
+    abstract class InputMode{}
+
+    interface I_OrderProcessable{
+        + IEnumlater ProcessOreder();
+    }
+
+    interface I_BoardClickable{
+        + IObservable<Tile> ClickTileAsync
+        + SetClickable(bool flag)
+    }
+    
+
+    GameBoard -left-> I_BoardClickable
+
+    GoOnInputMode --> I_BoardClickable
+    GoOnInputMode -up-|> InputMode
+    ItemInputMode --> I_BoardClickable
+    ItemInputMode -up-|> InputMode
+    TurnManager o-left-> InputMode
+
+    InGameState --> TurnManager   
+
+
+@enduml

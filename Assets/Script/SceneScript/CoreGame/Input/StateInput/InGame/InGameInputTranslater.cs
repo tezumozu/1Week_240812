@@ -5,7 +5,7 @@ using My1WeekGameSystems_ver3;
 using UniRx;
 using UnityEngine;
 
-public class InGameInputTranslater<T> : InputTranslater<T> , I_InGameInputTranslatable , IDisposable
+public class InGameTurnManager<T> : StateObjectManager<T> , I_InGameTurnUpdatable
 where T : Enum 
 {
     private Subject<I_OrderExecutionable> PlayerOrderSubject = new Subject<I_OrderExecutionable>();
@@ -14,10 +14,15 @@ where T : Enum
     private E_InGameInputMode currentMode;
     private Dictionary< E_InGameInputMode , I_InputModeUpdatable > InputModeDic;
 
-    public InGameInputTranslater (I_GameStateUpdatable<T> gameManager , T state) : base(gameManager ,state) {
+    bool isTakeTurn;
+
+
+    public InGameTurnManager (I_GameStateUpdatable<T> gameManager , T state) : base(gameManager ,state) {
 
         currentMode = E_InGameInputMode.GoOn;
         InputModeDic = new Dictionary<E_InGameInputMode, I_InputModeUpdatable>();
+
+        isTakeTurn = false;
 
         //オブジェクトの取得
         var Canvas = GameObject.Find("Canvas/InGame");
@@ -50,15 +55,44 @@ where T : Enum
 
         disposableList.Add(disposable);
     
+
+        //ターンの経過を監視する
+        disposable = goon.TakeTurnAsync.Subscribe(_ => {
+            isTakeTurn = true;
+        });
+
+        disposableList.Add(disposable);
+
+
+        disposable = item.TakeTurnAsync.Subscribe(_ => {
+            isTakeTurn = true;
+        });
+
+        disposableList.Add(disposable);
+
+
+        disposable = map.TakeTurnAsync.Subscribe(_ => {
+            isTakeTurn = true;
+        });
+
+        disposableList.Add(disposable);
     }
 
+
+
+
     public IEnumerator TakeTurn(){
-        Debug.Log("InGameInputTranslater : プレイヤーの入力待ち");
+        Debug.Log("InGameInputTranslater : ターン開始");
         //PlayerOrderSubject.OnNext(new TestOrder());
 
-        while(true){
+        //デフォルトのモード
+        ToActiveMode(E_InGameInputMode.GoOn);
+
+        while(!isTakeTurn){
             yield return null;
         }
+
+        isTakeTurn = false;
     }
 
     protected override void SetActive(bool flag){

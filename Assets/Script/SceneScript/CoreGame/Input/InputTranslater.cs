@@ -7,9 +7,9 @@ using UnityEngine;
 
 using UniRx;
 
-//InpuitManager（MonoBi）から受け取ったイベントを元にゲームへの入力へ加工する
+//自信が有効となる状態を把握し、その状態で扱うGameObjectを管理する
 
-public abstract class InputTranslater<T> : IDisposable 
+public abstract class StateObjectManager<T> : IDisposable 
 where T: Enum
 {
 
@@ -17,7 +17,7 @@ where T: Enum
     HashSet<T> isActiveStateList;
     protected List<IDisposable> disposableList;
 
-    protected InputTranslater (I_GameStateUpdatable<T> gameManager , T activeState){
+    protected StateObjectManager (I_GameStateUpdatable<T> gameManager , T activeState){
 
         disposableList = new List<IDisposable>();
 

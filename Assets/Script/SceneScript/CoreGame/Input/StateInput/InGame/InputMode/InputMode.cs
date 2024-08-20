@@ -7,9 +7,9 @@ using Zenject;
 
 public abstract class InputMode : MonoBehaviour , I_InputModeUpdatable{
 
-    protected Subject<I_OrderExecutionable> PlayerOrderSubject = new Subject<I_OrderExecutionable>();
+    protected Subject<Unit> takeTurnSubject = new Subject<Unit>();
     protected Subject<E_InGameInputMode> ChangeInputModeSubject = new Subject<E_InGameInputMode>();
-    public IObservable<I_OrderExecutionable> PlayerOrderAsync => PlayerOrderSubject;
+    public IObservable<Unit> TakeTurnAsync => takeTurnSubject;
     public IObservable<E_InGameInputMode> ChangeInputModeAsync => ChangeInputModeSubject;
 
     public abstract void SetActive(bool flag);

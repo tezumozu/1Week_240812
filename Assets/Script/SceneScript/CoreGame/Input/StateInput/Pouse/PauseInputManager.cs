@@ -7,7 +7,7 @@ using UnityEngine;
 
 //ポーズに関する入力を取得する(特殊)
 
-public class PauseInputTranslater<T> : InputTranslater<T> , I_PauseInputTranslatable where T : Enum   {
+public class PauseInputTranslater<T> : StateObjectManager<T> , I_PauseInputTranslatable where T : Enum   {
 
 
     private Subject<bool> pauseInputSubject = new Subject<bool>();

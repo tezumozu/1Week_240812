@@ -5,10 +5,7 @@ using UnityEngine;
 
 using UniRx;
 
-public interface I_InGameInputTranslatable {
-
-    public abstract void ToActiveMode(E_InGameInputMode mode);
-
+public interface I_InGameTurnUpdatable {
     public abstract IEnumerator TakeTurn();
 }
 

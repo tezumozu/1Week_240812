@@ -42,7 +42,7 @@ public class StorySceneManager : GameManager<E_StorySceneState> , I_Pausable {
         //入力系
         var StoryInput = new StoryInputTranslater<E_StorySceneState>(this,E_StorySceneState.Story);
         StoryInput.AddActiveState(E_StorySceneState.Prologe);
-        var InGameInput = new InGameInputTranslater<E_StorySceneState>(this,E_StorySceneState.InGame);
+        var InGameInput = new InGameTurnManager<E_StorySceneState>(this,E_StorySceneState.InGame);
         var ResultInput = new ResultInputTranslater<E_StorySceneState>(this,E_StorySceneState.Result);
 
         var initStaging = new InitStagingState(gameBoardManager,blackOutStaiging);

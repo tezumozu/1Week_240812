@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 4422523619965733088}
   - component: {fileID: 2217346617709824441}
   - component: {fileID: 1154502549129099529}
+  - component: {fileID: 5568544457509117464}
   m_Layer: 0
   m_Name: WallTile
   m_TagString: Untagged
@@ -64,7 +65,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10302, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 3090002274b42d64ea06e472652bf98c, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -121,6 +122,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   CameraRange: 3
   MouseOverEffect: {fileID: 6504579938756838141}
+--- !u!95 &5568544457509117464
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1130190721148238486}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 9fee5c550de079e40a39f407a37e4dec, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 1
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &6504579938756838141
 GameObject:
   m_ObjectHideFlags: 0

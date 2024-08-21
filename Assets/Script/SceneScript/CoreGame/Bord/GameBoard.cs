@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Timers;
 using My1WeekGameSystems_ver3;
 using UniRx;
 using Unity.VisualScripting;
@@ -10,11 +11,17 @@ using UnityEngine;
 using Zenject;
 
 //プレイヤーの駒やタイルを管理する、盤面の状態を報告する
-public class GameBoard: MonoBehaviour , I_GameBoardChackable , I_CameraTargettable , I_BoardClickable{
+public class GameBoard: 
+AnimMono<E_BoardAnim> ,
+I_GameBoardChackable ,
+I_CameraTargettable ,
+I_BoardClickable
+{
 
-    //ボードを見渡す際のカメラとの距離
-    float CameraRange = 10;
-    GameObject PlayerObject;
+    PlayerObject player;
+
+    [SerializeField]
+    GameObject GameCamera;
 
     float tileDistance = 0.5f;
     float tileSize = 2.0f;
@@ -42,8 +49,11 @@ public class GameBoard: MonoBehaviour , I_GameBoardChackable , I_CameraTargettab
 
     void Start(){
 
-        //プレイヤーを取得する
+        //アニメーションの登録
+        AnimList.Add(E_BoardAnim.CreateBoardAnim , createBoardAnim);
 
+
+        //プレイヤーを取得する
     }
 
 
@@ -63,7 +73,6 @@ public class GameBoard: MonoBehaviour , I_GameBoardChackable , I_CameraTargettab
 
         var TileFactory = new TileFactory();
 
-
         //追加する
         for(int x = 0; x < hight; x++){
 
@@ -78,7 +87,7 @@ public class GameBoard: MonoBehaviour , I_GameBoardChackable , I_CameraTargettab
                 tileObject.transform.parent = gameObject.transform;
 
                 //ローカル座標を変更
-                tileObject.transform.Translate(tile_x , 0.0f , -tile_y , Space.Self);
+                tileObject.transform.Translate(tile_x , 10.0f , -tile_y , Space.Self);
 
                 tileList[x,y] = tileObject.GetComponent<Tile>();
 
@@ -123,8 +132,7 @@ public class GameBoard: MonoBehaviour , I_GameBoardChackable , I_CameraTargettab
         }
 
         //カメラをスタート地点へ
-        var Camera = GameObject.Find("MainCamera");
-        var coroutine = tileList[0,0].TargetThis(Camera);
+        var coroutine = currentTile.TargetThis(GameCamera);
         CoroutineHander.OrderStartCoroutine(coroutine);
     }
 
@@ -132,17 +140,114 @@ public class GameBoard: MonoBehaviour , I_GameBoardChackable , I_CameraTargettab
 
 
     //アニメ
-    public IEnumerator StartInitStagingAnim(){
-        //
-        Debug.Log("GameBoardManager : ボードが生成されるアニメーション");
-        yield return null;
+    private IEnumerator createBoardAnim(){
+
+        //カメラを直す
+        var coroutine = TargetThis(GameCamera);
+        CoroutineHander.OrderStartCoroutine(coroutine);
+
+        while(!CoroutineHander.isFinishCoroutine(coroutine)){
+            yield return null;
+        }
+
+
+        //ボードを生成するアニメ
+        coroutine = callCreateTile();
+        CoroutineHander.OrderStartCoroutine(coroutine);
+
+        while(!CoroutineHander.isFinishCoroutine(coroutine)){
+            yield return null;
+        }
+
+
+        //ちらっと見せる
+        foreach(var tile in tileList){
+            coroutine = tile.StartAnim(E_TileAnim.ClearTile);
+            CoroutineHander.OrderStartCoroutine(coroutine);
+        }
+
+        //全てのコルーチンが終わったら終了
+        while(!CoroutineHander.isFinishCoroutine(coroutine)){
+            yield return null;
+        }
+
+
+        //カメラをスタート地点へ
+        var Camera = GameObject.Find("MainCamera");
+        coroutine = currentTile.TargetThis(Camera);
+        CoroutineHander.OrderStartCoroutine(coroutine);
+
+        while(!CoroutineHander.isFinishCoroutine(coroutine)){
+            yield return null;
+        }
+
+
+        //プレイヤーを表す駒を置く
+        string path = "Prefab/InGame/Player";
+        var PlayerPrefab = Resources.Load(path);
+
+        if(PlayerPrefab == null){
+            Debug.Log("GameBoardManager : 読み込み失敗");
+        }
+
+        //インスタンス生成
+        var playerObject = ( GameObject ) GameObject.Instantiate(PlayerPrefab);
+
+        //座標を変更
+        playerObject.transform.position = currentTile.transform.position;
+        playerObject.transform.Translate ( 0.0f , 0.6f , 0.0f ) ;
         
+    }
+
+    private IEnumerator callCreateTile(){
+
+        IEnumerator coroutine = null;
+
+        for(int x = 0; x < dungeonHight; x++){
+            for(int y = 0; y < dungeonHight; y++){
+                
+                coroutine = tileList[y,x].StartAnim(E_TileAnim.CreateTile);
+                CoroutineHander.OrderStartCoroutine(coroutine);
+
+                //時間経過でアニメーションを呼び出すために待つ
+                float currentTime = 0.0f;
+                float callTime = 0.01f; // 秒
+
+                while(callTime > currentTime){
+                    currentTime += Time.deltaTime;
+                    yield return null;
+                }
+
+            }
+        }
+
+        
+        //最後のコルーチンが終了するのを待つ
+        while(!CoroutineHander.isFinishCoroutine(coroutine)){
+            yield return null;
+        }
+
     }
 
 
 
     //カメラを特定の位置に移動させる
     public IEnumerator TargetThis(GameObject camera){
-        yield return null;
+        float range = dungeonHight * (tileSize + tileDistance) - tileDistance;
+
+        var point = (float) Math.Sqrt(2) * range / 2;
+        var NextPos = transform.position;
+        NextPos += new Vector3( 0.0f , point , -point );
+
+        while( Vector3.Distance( camera.transform.position , NextPos ) * 0.5f > 0.001f  ){
+            camera.transform.position += (NextPos - camera.transform.position) * 0.5f;
+            yield return null;
+        }
+
+        camera.transform.position = NextPos;
+
     }
+
+
+    
 }

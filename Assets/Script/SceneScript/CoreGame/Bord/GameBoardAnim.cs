@@ -17,12 +17,13 @@ public class GameBoardAnim : AnimManager<E_BoardAnim>{
     private IEnumerator CreateBoardAnim(){
 
         //アニメーション終了待機
-        var coroutine = gameBoard.StartInitStagingAnim();
+        var coroutine = gameBoard.StartAnim(E_BoardAnim.CreateBoardAnim);
         CoroutineHander.OrderStartCoroutine(coroutine);
 
-        while(CoroutineHander.isFinishCoroutine(coroutine)){
+        while(!CoroutineHander.isFinishCoroutine(coroutine)){
             yield return null;
         }
+
     }
 
 }

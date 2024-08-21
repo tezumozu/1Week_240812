@@ -113,6 +113,19 @@ namespace My1WeekGameSystems_ver3{
             checkerCoroutineDic.Add( coroutine , checkerCoroutine );
         }
 
+        //リスト版
+        public static void OrderStartCoroutine(List<IEnumerator> coroutineList,bool isPausable){
+            foreach(var coroutine in coroutineList){
+                OrderStartCoroutine(coroutine,isPausable);
+            }
+        }
+
+        public static void OrderStartCoroutine(List<IEnumerator> coroutineList){
+            foreach(var coroutine in coroutineList){
+                OrderStartCoroutine(coroutine,true);
+            }
+        }
+
 
 
 
@@ -125,6 +138,8 @@ namespace My1WeekGameSystems_ver3{
 
             //受け取ったコルーチンのポインタをキーに開始したコルーチンのポインタを辞書に保存
             activeCoroutinDic.Add(coroutine,isPausable);
+
+            Debug.Log(activeCoroutinDic.Count);
 
             //同フレーム内で辞書の追加と削除を絶対に行わない
             yield return null ;
@@ -156,9 +171,22 @@ namespace My1WeekGameSystems_ver3{
             instance.StartCoroutine(target);
         }
 
+
+
         //登録されているコルーチンが終了しているか確認する
         public static bool isFinishCoroutine(IEnumerator target){
             return !activeCoroutinDic.ContainsKey(target);
+        }
+
+
+        //登録されているコルーチンが終了しているか複数確認
+        public static bool isFinishCoroutine(IReadOnlyList<IEnumerator> targetList){
+            foreach(var target in targetList){
+                if(activeCoroutinDic.ContainsKey(target)){
+                    return false;
+                }
+            }
+            return true;
         }
 
     }

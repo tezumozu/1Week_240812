@@ -23,6 +23,7 @@ public class StoryGameBoardManager : GameBoardManager , I_StoryGettable {
 
         currentChapter = chaperList.GetChapter(1);
 
+
         //プレイヤーがゴールした
         var disposable = gameBoard.PlayerGoalAsync.Subscribe(x => {
 
@@ -39,6 +40,8 @@ public class StoryGameBoardManager : GameBoardManager , I_StoryGettable {
         });
 
         disposableList.Add(disposable);
+
+        
 
         //プレイヤーがクリアした
         disposable = gameBoard.LifeLostAsync.Subscribe(life => {

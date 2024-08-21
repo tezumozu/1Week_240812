@@ -17,7 +17,7 @@ where T_AnimName : Enum
         CoroutineHander.OrderStartCoroutine( coroutine );
 
         //アニメーションが終わるまで待機
-        while(CoroutineHander.isFinishCoroutine( coroutine )){
+        while(!CoroutineHander.isFinishCoroutine( coroutine )){
             yield return null;
         }
     }

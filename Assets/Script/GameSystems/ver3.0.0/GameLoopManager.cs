@@ -23,6 +23,9 @@ namespace My1WeekGameSystems_ver3{
         [SerializeField] 
         private LoadingUIManager loadingUIManager;
 
+        [SerializeField]
+        public int GameFrameLate = 60;
+
         [Inject]
         private I_ObjectUpdatable objectUpdataer;
 
@@ -30,6 +33,9 @@ namespace My1WeekGameSystems_ver3{
         //ゲームマネージャーの監視
         [Inject]
         private void InjectInit(I_SceneLoadNoticable gameManager){
+            //フレームレートを設定
+            Application.targetFrameRate = GameFrameLate;
+
             sceneLoadDispose = gameManager.SceneLoadAsync
             .Subscribe( (sceneName) => {
                 activeIsHaveToLoading(sceneName);

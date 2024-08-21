@@ -50,6 +50,7 @@ public class InitStagingState : State{
         }
 
 
+
         //ゲーム開始用のアニメーションを流す
         coroutine = startGameAnim.StartAnim(E_StartGameAnim.StartGame);
         CoroutineHander.OrderStartCoroutine(coroutine,false);

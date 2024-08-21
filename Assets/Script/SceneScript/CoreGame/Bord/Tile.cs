@@ -1,14 +1,16 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using My1WeekGameSystems_ver3;
 using UniRx;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using Zenject;
 using Zenject.Asteroids;
 
 public abstract class Tile :
-MonoBehaviour ,
+AnimMono<E_TileAnim> ,
 I_CameraTargettable ,
 I_FactoryMakable , 
 I_TileEffectable , 
@@ -32,8 +34,8 @@ IPointerExitHandler {
     }
 
     protected bool isClickable;
-    protected bool isTurnable;
-    protected bool isWarkable;
+    protected bool isTurned;
+    protected bool isWalkable;
 
 
     protected Subject<Tile> ClickSubject = new Subject<Tile>();
@@ -41,12 +43,71 @@ IPointerExitHandler {
 
     private void Start(){
         isClickable = false;
+        isTurned = false;
+        isWalkable = false;
+
         MouseOverEffect.SetActive(false);
-        isTurnable = true;
-        isWarkable = false;
+        
+        AnimList.Add(E_TileAnim.CreateTile,creatTile);
+        AnimList.Add(E_TileAnim.ClearTile,clearTile);
+        AnimList.Add(E_TileAnim.TurnOver,turnOverTile);
+
+        InitTile();
     }
 
 
+    //Tile固有
+
+    //タイルの初期化
+    protected abstract void InitTile();
+
+    //タイルが裏返されたときの効果
+    public virtual IEnumerator TileEffect(){
+        IEnumerator coroutine = null;
+
+        Debug.Log("test");
+        
+        //タイルがひっくりかえってなかったらひっくり返す
+        if(!isTurned){
+            isTurned = true;
+
+            coroutine = StartAnim(E_TileAnim.TurnOver);
+            CoroutineHander.OrderStartCoroutine(coroutine);
+
+            while(CoroutineHander.isFinishCoroutine(coroutine)){
+                yield return null;
+            }
+
+        }
+
+        //タイルごとの処理
+        coroutine = TileClickEffect();
+        CoroutineHander.OrderStartCoroutine(coroutine);
+
+        while(CoroutineHander.isFinishCoroutine(coroutine)){
+            yield return null;
+        }
+    }
+
+    protected abstract IEnumerator TileClickEffect();
+    
+
+    //周辺のタイルを覚えておく
+    public void AddRelatedTile(Tile relatedTile){
+        relatedTileList.Add(relatedTile);
+    }
+
+    //クリックされたときの処理
+    protected virtual void MouseClick(){
+        print($"オブジェクト {name} がクリックされたよ！");
+        isClickable = false;
+        MouseOverEffect.SetActive(false);
+        ClickSubject.OnNext(this);
+    }
+
+
+
+    //I_CameraTargetable
     //カメラを特定の位置に移動させる
     public virtual IEnumerator TargetThis(GameObject camera){
 
@@ -54,44 +115,37 @@ IPointerExitHandler {
         var NextPos = transform.position;
         NextPos += new Vector3( 0.0f , point , -point );
 
-        while( Vector3.Distance( camera.transform.position , NextPos ) * 0.01f > 0.0001f  ){
-            camera.transform.position += (NextPos - camera.transform.position) * 0.01f;
+        while( Vector3.Distance( camera.transform.position , NextPos ) * 0.1f > 0.001f  ){
+            camera.transform.position += (NextPos - camera.transform.position) * 0.1f;
             yield return null;
         }
 
         camera.transform.position = NextPos;
-
-    }
-
-
-    //周辺のタイルを覚えておく
-    public void AddRelatedTile(Tile relatedTile){
-        relatedTileList.Add(relatedTile);
     }
 
 
 
-    //クリックできるように変更する
+
+    
+
+
+    //Event系
+    //クリック可能か設定する
     public virtual void SetIsClickable(bool flag){
         isClickable = flag;
     }
 
-
-
-    //クリックされたとき
+    //クリックされる
     public void OnPointerClick(PointerEventData eventData){
         if(!isClickable) return;
         MouseClick();
     }
 
-
-    //タイルが裏返されたときの処理
-    public abstract IEnumerator TileEffect();
-
-
-
     //マウスオーバー
     public void OnPointerEnter(PointerEventData eventData){
+
+        Debug.Log(isClickable);
+
         if(!isClickable) return;
         MouseOverEffect.SetActive(true);
     }
@@ -102,12 +156,52 @@ IPointerExitHandler {
     }
 
 
-    //クリックされたときの処理
-    protected virtual void MouseClick(){
-        print($"オブジェクト {name} がクリックされたよ！");
-        isClickable = false;
-        MouseOverEffect.SetActive(false);
-        ClickSubject.OnNext(this);
+
+
+
+    //Anim
+    private IEnumerator turnOverTile(){
+        //すでに再生中ならリターン
+        if(!isAnimFin) yield break;
+
+        isAnimFin = false;
+        animator.SetTrigger("TurnOver");
+
+        while(!isAnimFin){
+            yield return null;
+        }
+
     }
+
+
+    private IEnumerator creatTile(){
+        //すでに再生中ならリターン
+        if(!isAnimFin) yield break;
+
+        isAnimFin = false;
+        animator.SetTrigger("CreateTile");
+
+        while(!isAnimFin){
+            yield return null;
+        }
+        
+    }
+
+
+    private IEnumerator clearTile(){
+        //すでに再生中ならリターン
+        if(!isAnimFin) yield break;
+
+        isAnimFin = false;
+        animator.SetTrigger("ClearTile");
+
+        while(!isAnimFin){
+            yield return null;
+        }
+        
+    }
+
+
+    
 
 }

@@ -5,7 +5,6 @@ using System.IO;
 using System.Timers;
 using My1WeekGameSystems_ver3;
 using UniRx;
-using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
 using Zenject;
@@ -29,7 +28,10 @@ I_BoardClickable
     int dungeonHight;
 
     Tile[,] tileList;
-    Tile currentTile;
+    public Tile currentTile {
+        get;
+        private set;
+    }
 
 
 
@@ -38,8 +40,8 @@ I_BoardClickable
     public IObservable<int> LifeLostAsync => lifeLostSubject; 
 
     //プレイヤーがゴールしたことを通知する
-    private Subject<int> playerGoalSubject = new Subject<int>();
-    public IObservable<int> PlayerGoalAsync => playerGoalSubject; 
+    private Subject<Unit> playerGoalSubject = new Subject<Unit>();
+    public IObservable<Unit> PlayerGoalAsync => playerGoalSubject; 
 
     //クリックされたTileを返す
     private Subject<Tile> clickedTileSubject = new Subject<Tile>();
@@ -95,6 +97,14 @@ I_BoardClickable
                     currentTile = tileList[x,y];
                 }
 
+                if(data[x,y] == E_DungeonCell.Goal){
+                    tileList[x,y].StepedOnAsync.Subscribe(_ => {
+                        Debug.Log("GameBoard : GOAL");
+                        //ゴールしたことを通知
+                        playerGoalSubject.OnNext(Unit.Default);
+                    }).AddTo(this);
+                }
+
                 tileList[x,y].ClickAsync.Subscribe( tile => {
 
                     clickedTileSubject.OnNext(tile);
@@ -126,14 +136,11 @@ I_BoardClickable
     }
 
 
+
     public void SetClickable(bool flag){
         foreach(var tile in currentTile.RelatedTileList){
             tile.SetIsClickable(flag);
         }
-
-        //カメラをスタート地点へ
-        var coroutine = currentTile.TargetThis(GameCamera);
-        CoroutineHander.OrderStartCoroutine(coroutine);
     }
 
 
@@ -172,9 +179,28 @@ I_BoardClickable
         }
 
 
+        //スタート地点とゴール地点をめくる
+        coroutine = currentTile.StartAnim(E_TileAnim.TurnOver);
+        CoroutineHander.OrderStartCoroutine(coroutine);
+
+        for(int x = 0; x < dungeonHight; x++){
+
+            for(int y = 0; y < dungeonHight; y++){
+
+                if(tileList[y,x].TileType == E_DungeonCell.Goal){
+                    coroutine = tileList[y,x].StartAnim(E_TileAnim.TurnOver);
+                    CoroutineHander.OrderStartCoroutine(coroutine);
+                }
+            }    
+        }
+
+        while(!CoroutineHander.isFinishCoroutine(coroutine)){
+            yield return null;
+        }
+
+
         //カメラをスタート地点へ
-        var Camera = GameObject.Find("MainCamera");
-        coroutine = currentTile.TargetThis(Camera);
+        coroutine = currentTile.TargetThis(GameCamera);
         CoroutineHander.OrderStartCoroutine(coroutine);
 
         while(!CoroutineHander.isFinishCoroutine(coroutine)){
@@ -183,21 +209,42 @@ I_BoardClickable
 
 
         //プレイヤーを表す駒を置く
-        string path = "Prefab/InGame/Player";
-        var PlayerPrefab = Resources.Load(path);
+        //プレイヤーがなければ
+        GameObject playerObject;
+        if(player == null){
+            string path = "Prefab/InGame/Player";
+            var PlayerPrefab = Resources.Load(path);
 
-        if(PlayerPrefab == null){
-            Debug.Log("GameBoardManager : 読み込み失敗");
+            if(PlayerPrefab == null){
+                Debug.Log("GameBoardManager : 読み込み失敗");
+            }
+
+            //インスタンス生成
+            playerObject = ( GameObject ) GameObject.Instantiate(PlayerPrefab);
+            player = playerObject.GetComponent<PlayerObject>();
+            player.InitObject();
+
+            player.transform.parent = gameObject.transform;
+            
+        }else{
+            playerObject = player.gameObject;
+            coroutine = player.StartAnim(E_PlayerAnim.Init);
+            CoroutineHander.OrderStartCoroutine(coroutine);
         }
 
-        //インスタンス生成
-        var playerObject = ( GameObject ) GameObject.Instantiate(PlayerPrefab);
-
         //座標を変更
-        playerObject.transform.position = currentTile.transform.position;
-        playerObject.transform.Translate ( 0.0f , 0.6f , 0.0f ) ;
+        playerObject.transform.position = new Vector3 (currentTile.transform.position.x , 5.0f + 0.2f , currentTile.transform.position.z); 
+
+        coroutine = player.StartAnim(E_PlayerAnim.SetPlayer);
+        CoroutineHander.OrderStartCoroutine(coroutine);
+
+        while(!CoroutineHander.isFinishCoroutine(coroutine)){
+            yield return null;
+        }
         
     }
+
+
 
     private IEnumerator callCreateTile(){
 
@@ -220,7 +267,6 @@ I_BoardClickable
 
             }
         }
-
         
         //最後のコルーチンが終了するのを待つ
         while(!CoroutineHander.isFinishCoroutine(coroutine)){
@@ -246,6 +292,31 @@ I_BoardClickable
 
         camera.transform.position = NextPos;
 
+    }
+
+
+    //プレイヤーを移動させる
+    public IEnumerator MovePlayer(Tile tile){
+        //プレイヤーに移動させる
+        var coroutine = player.ToMoveTile(tile);
+
+        CoroutineHander.OrderStartCoroutine(coroutine);
+
+        while(!CoroutineHander.isFinishCoroutine(coroutine)){
+            yield return null;
+        }
+
+        //プレイヤーがいるタイルを更新
+        currentTile = tile;
+
+        //カメラを移動
+        coroutine = currentTile.TargetThis(GameCamera);
+
+        CoroutineHander.OrderStartCoroutine(coroutine);
+
+        while(!CoroutineHander.isFinishCoroutine(coroutine)){
+            yield return null;
+        }
     }
 
 

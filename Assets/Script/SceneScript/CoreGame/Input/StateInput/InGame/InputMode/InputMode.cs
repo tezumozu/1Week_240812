@@ -12,7 +12,7 @@ public abstract class InputMode : MonoBehaviour , I_InputModeUpdatable{
     public IObservable<Unit> TakeTurnAsync => takeTurnSubject;
     public IObservable<E_InGameInputMode> ChangeInputModeAsync => ChangeInputModeSubject;
 
-    public abstract void SetActive(bool flag);
+    public abstract IEnumerator SetActive(bool flag);
     protected void ChangeMode(E_InGameInputMode mode){
         ChangeInputModeSubject.OnNext(mode);
     }

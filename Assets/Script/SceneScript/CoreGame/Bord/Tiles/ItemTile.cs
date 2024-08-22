@@ -5,7 +5,7 @@ using UnityEngine;
 public class ItemTile : Tile{
 
     protected override void InitTile(){
-        
+        isWalkable = true;
     }
 
     protected override IEnumerator TileClickEffect(){

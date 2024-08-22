@@ -16,26 +16,30 @@ public class GoOnInputMode : InputMode{
 
         //タイルがクリックされたら
         gameBoard.ClickedTileAsync.Subscribe(Tile => {
-            
-            //現在アクティブでないなら
-            if(isInputActive) return;
 
-            //連続で入力されないようにUIをオフにする
-            SetActive(false);
+            //現在アクティブでないなら
+            if(!isInputActive) return;
+
+            //連続で入力されないようにオフにする
+            var coroutine = SetActive(false);
+            CoroutineHander.OrderStartCoroutine(coroutine);
 
             //Tileごとに処理をする
-            var coroutine = TileEffectExecution(Tile);
+            coroutine = TileEffectExecution(Tile);
             CoroutineHander.OrderStartCoroutine(coroutine);
             
-
         }).AddTo(this);
 
     }
 
-    public override void SetActive(bool flag){
+    public override IEnumerator SetActive(bool flag){
+        yield return null;
+
+        //自身を有効・無効にする
+        isInputActive = flag;
         gameObject.SetActive(flag);
         
-        //クリックできるタイルをクリックできる状態にする
+        //クリックできるタイルをクリックできる状態を変更する
         gameBoard.SetClickable(flag);
     }
 
@@ -53,11 +57,9 @@ public class GoOnInputMode : InputMode{
         var coroutine = tile.TileEffect();
         CoroutineHander.OrderStartCoroutine(coroutine);
 
-        while(CoroutineHander.isFinishCoroutine(coroutine)){
+        while(!CoroutineHander.isFinishCoroutine(coroutine)){
             yield return null;
         }
-
-        Debug.Log("Test");
 
         takeTurnSubject.OnNext(Unit.Default);
     }

@@ -7,8 +7,9 @@ public class StartTile : Tile{
     protected override void InitTile(){
         //タイルの設定
         isWalkable = true;
-        isTurned = true; // すでにめくれている
-        isClickable = false;        
+        isTurned = false;
+        isClickable = false;
+        TileType = E_DungeonCell.Start;  
     }
 
     protected override IEnumerator TileClickEffect(){

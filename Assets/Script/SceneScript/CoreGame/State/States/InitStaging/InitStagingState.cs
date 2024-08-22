@@ -16,7 +16,6 @@ public class InitStagingState : State{
     public InitStagingState (I_DungeonObjectCreatable dungeonManager , I_BlackInable animManager){
         this.dungeonManager = dungeonManager;
         blackOutAnimManager = animManager;
-        startGameAnim = new StartGameAnim();
     }
 
     public override IEnumerator UpdateState(){
@@ -48,17 +47,6 @@ public class InitStagingState : State{
         while(!CoroutineHander.isFinishCoroutine(coroutine)){
             yield return null;
         }
-
-
-
-        //ゲーム開始用のアニメーションを流す
-        coroutine = startGameAnim.StartAnim(E_StartGameAnim.StartGame);
-        CoroutineHander.OrderStartCoroutine(coroutine,false);
-
-        while(!CoroutineHander.isFinishCoroutine(coroutine)){
-            yield return null;
-        }
-
 
         //状態が終了
         finishStateSubject.OnNext(Unit.Default);

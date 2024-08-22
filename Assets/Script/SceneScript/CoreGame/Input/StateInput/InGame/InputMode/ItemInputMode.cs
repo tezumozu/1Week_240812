@@ -8,11 +8,12 @@ public class ItemInputMode : InputMode{
     GameBoard gameBoard;
 
     void Start(){
-        SetActive(false);
+        gameObject.SetActive(false);
     }
 
-    public override void SetActive(bool flag){
+    public override IEnumerator SetActive(bool flag){
         gameObject.SetActive(flag);
+        yield return null;
     }
 
     public void ChangeMode_Map (){

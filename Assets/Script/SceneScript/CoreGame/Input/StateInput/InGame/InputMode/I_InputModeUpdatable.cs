@@ -9,5 +9,5 @@ public interface I_InputModeUpdatable {
     public IObservable<Unit> TakeTurnAsync {get;}
     public IObservable<E_InGameInputMode> ChangeInputModeAsync{get;}
 
-    public abstract void SetActive(bool flag);
+    public abstract IEnumerator SetActive(bool flag);
 }

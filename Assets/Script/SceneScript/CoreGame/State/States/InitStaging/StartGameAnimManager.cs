@@ -13,7 +13,6 @@ public class StartGameAnim : AnimManager<E_StartGameAnim>{
     }
 
     private IEnumerator PlayStartAnimation(){
-        Debug.Log("StartGameAnim : ゲーム開始のアニメーション");
         yield return null;
     }
 

@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using My1WeekGameSystems_ver3;
 using UniRx;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using Zenject;
@@ -28,9 +27,9 @@ IPointerExitHandler {
     public IReadOnlyCollection<Tile> RelatedTileList => relatedTileList;
 
 
-    public E_DungeonCell type {
+    public E_DungeonCell TileType {
         get;
-        private set;
+        protected set;
     }
 
     protected bool isClickable;
@@ -41,10 +40,15 @@ IPointerExitHandler {
     protected Subject<Tile> ClickSubject = new Subject<Tile>();
     public IObservable<Tile> ClickAsync => ClickSubject;
 
+    //プレイヤーがタイルを踏んだ
+    protected Subject<Unit> stepedOnSubject = new Subject<Unit>();
+    public IObservable<Unit> StepedOnAsync => stepedOnSubject;
+
     private void Start(){
         isClickable = false;
         isTurned = false;
         isWalkable = false;
+        TileType = E_DungeonCell.Way;
 
         MouseOverEffect.SetActive(false);
         
@@ -64,8 +68,6 @@ IPointerExitHandler {
     //タイルが裏返されたときの効果
     public virtual IEnumerator TileEffect(){
         IEnumerator coroutine = null;
-
-        Debug.Log("test");
         
         //タイルがひっくりかえってなかったらひっくり返す
         if(!isTurned){
@@ -74,19 +76,34 @@ IPointerExitHandler {
             coroutine = StartAnim(E_TileAnim.TurnOver);
             CoroutineHander.OrderStartCoroutine(coroutine);
 
-            while(CoroutineHander.isFinishCoroutine(coroutine)){
+            while(!CoroutineHander.isFinishCoroutine(coroutine)){
                 yield return null;
             }
 
+
         }
+
 
         //タイルごとの処理
         coroutine = TileClickEffect();
         CoroutineHander.OrderStartCoroutine(coroutine);
 
-        while(CoroutineHander.isFinishCoroutine(coroutine)){
+        while(!CoroutineHander.isFinishCoroutine(coroutine)){
             yield return null;
         }
+
+
+        if(isWalkable){
+            var gameBoard = GameObject.Find("GameBoard").GetComponent<GameBoard>();
+
+            coroutine = gameBoard.MovePlayer(this);
+            CoroutineHander.OrderStartCoroutine(coroutine);
+
+            while(!CoroutineHander.isFinishCoroutine(coroutine)){
+                yield return null;
+            }
+        }
+
     }
 
     protected abstract IEnumerator TileClickEffect();
@@ -95,14 +112,6 @@ IPointerExitHandler {
     //周辺のタイルを覚えておく
     public void AddRelatedTile(Tile relatedTile){
         relatedTileList.Add(relatedTile);
-    }
-
-    //クリックされたときの処理
-    protected virtual void MouseClick(){
-        print($"オブジェクト {name} がクリックされたよ！");
-        isClickable = false;
-        MouseOverEffect.SetActive(false);
-        ClickSubject.OnNext(this);
     }
 
 
@@ -115,8 +124,8 @@ IPointerExitHandler {
         var NextPos = transform.position;
         NextPos += new Vector3( 0.0f , point , -point );
 
-        while( Vector3.Distance( camera.transform.position , NextPos ) * 0.1f > 0.001f  ){
-            camera.transform.position += (NextPos - camera.transform.position) * 0.1f;
+        while( Vector3.Distance( camera.transform.position , NextPos ) * 0.3f > 0.001f  ){
+            camera.transform.position += (NextPos - camera.transform.position) * 0.3f;
             yield return null;
         }
 
@@ -138,14 +147,15 @@ IPointerExitHandler {
     //クリックされる
     public void OnPointerClick(PointerEventData eventData){
         if(!isClickable) return;
-        MouseClick();
+
+        isClickable = false;
+        MouseOverEffect.SetActive(false);
+        ClickSubject.OnNext(this);
+        
     }
 
     //マウスオーバー
     public void OnPointerEnter(PointerEventData eventData){
-
-        Debug.Log(isClickable);
-
         if(!isClickable) return;
         MouseOverEffect.SetActive(true);
     }
@@ -163,6 +173,9 @@ IPointerExitHandler {
     private IEnumerator turnOverTile(){
         //すでに再生中ならリターン
         if(!isAnimFin) yield break;
+
+        //タイルがひっくりかえった
+        isTurned = true;
 
         isAnimFin = false;
         animator.SetTrigger("TurnOver");

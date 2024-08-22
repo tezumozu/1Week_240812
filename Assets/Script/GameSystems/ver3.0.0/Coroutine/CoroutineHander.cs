@@ -139,7 +139,7 @@ namespace My1WeekGameSystems_ver3{
             //受け取ったコルーチンのポインタをキーに開始したコルーチンのポインタを辞書に保存
             activeCoroutinDic.Add(coroutine,isPausable);
 
-            Debug.Log(activeCoroutinDic.Count);
+            //Debug.Log(activeCoroutinDic.Count);
 
             //同フレーム内で辞書の追加と削除を絶対に行わない
             yield return null ;

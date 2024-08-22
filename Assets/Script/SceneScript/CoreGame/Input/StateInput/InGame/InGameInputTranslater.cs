@@ -36,21 +36,30 @@ where T : Enum
 
 
         var disposable = goon.ChangeInputModeAsync.Subscribe((mode) => {
-            ToActiveMode(mode);
+
+            var coroutine = ToActiveMode(mode);
+            CoroutineHander.OrderStartCoroutine(coroutine);
+
         });
 
         disposableList.Add(disposable);
 
 
         disposable = item.ChangeInputModeAsync.Subscribe((mode) => {
-            ToActiveMode(mode);
+
+            var coroutine = ToActiveMode(mode);
+            CoroutineHander.OrderStartCoroutine(coroutine);
+
         });
 
         disposableList.Add(disposable);
 
 
         disposable = map.ChangeInputModeAsync.Subscribe((mode) => {
-            ToActiveMode(mode);
+
+            var coroutine = ToActiveMode(mode);
+            CoroutineHander.OrderStartCoroutine(coroutine);
+            
         });
 
         disposableList.Add(disposable);
@@ -82,29 +91,42 @@ where T : Enum
 
 
     public IEnumerator TakeTurn(){
-        Debug.Log("InGameInputTranslater : ターン開始");
-        //PlayerOrderSubject.OnNext(new TestOrder());
-
         //デフォルトのモード
-        ToActiveMode(E_InGameInputMode.GoOn);
+        var coroutine = ToActiveMode(E_InGameInputMode.GoOn);
+        CoroutineHander.OrderStartCoroutine(coroutine);
 
-        while(!isTakeTurn){
+        while(!CoroutineHander.isFinishCoroutine(coroutine)){
             yield return null;
         }
 
         isTakeTurn = false;
+
+        while(!isTakeTurn){
+            yield return null;
+        }
     }
 
     protected override void SetActive(bool flag){
 
     }
 
-    public void ToActiveMode(E_InGameInputMode mode){
+    public IEnumerator ToActiveMode(E_InGameInputMode mode){
+
         //現在の入力UIを非表示 
-        InputModeDic[currentMode].SetActive(false);
+        var coroutine = InputModeDic[currentMode].SetActive(false);
+        CoroutineHander.OrderStartCoroutine(coroutine);
+
+        while(!CoroutineHander.isFinishCoroutine(coroutine)){
+            yield return null;
+        }
 
         //指定された入力モードを有効にする
         currentMode = mode;
-        InputModeDic[currentMode].SetActive(true);
+        coroutine = InputModeDic[currentMode].SetActive(true);
+        CoroutineHander.OrderStartCoroutine(coroutine);
+
+        while(!CoroutineHander.isFinishCoroutine(coroutine)){
+            yield return null;
+        }
     }
 }

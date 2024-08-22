@@ -37,6 +37,7 @@ public class InGameState : State{
 
         //プレイヤーがゴールしたらゲームを終了する
         disposable = boardManager.PlayerGoalAsync.Subscribe(_ => {
+            Debug.Log("GamreFin");
             isGameFin = true;
         });
 
@@ -51,9 +52,12 @@ public class InGameState : State{
         //タイマーを起動 (ポーズで終了しない)
         CoroutineHander.OrderStartCoroutine(Timer.StartMeasureTime(),false);
 
+        isGameFin = false;
 
         //ゲームが終了するまでターンを繰り返す( ライフ0 か ゴール か)
         while(!isGameFin){
+
+            Debug.Log("InGameState : ターン開始");
 
             //入力 -> 処理の流れを待つ
             var coroutine = inputManager.TakeTurn();
